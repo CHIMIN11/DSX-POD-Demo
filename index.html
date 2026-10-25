@@ -1,0 +1,671 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Vera Rubin DSX POD</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Semi+Condensed:wght@500;700&family=Noto+Sans+TC:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: full-bleed studio-black 3D stage; chapter caption top-left, transport rail (play · chapters · x-ray) pinned bottom */
+:root{
+  --bg:#050607; --panel:rgba(12,14,17,.8); --line:#262a31; --fg:#ecebe7; --mute:#8a8f97;
+  --green:#7ccf22; --red:#e8382f; --cool:#3ec5ff; --gold:#f2b03a;
+  --f-disp:"Saira Semi Condensed","Arial Narrow",sans-serif;
+  --f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+html,body{height:100%;margin:0;overflow:hidden;background:var(--bg);color:var(--fg);font-family:var(--f-body)}
+#scene{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.cap{position:fixed;top:calc(env(safe-area-inset-top,0px) + 16px);left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));pointer-events:none;max-width:560px;transition:opacity .45s}
+.cap.fade{opacity:0}
+.cap{text-shadow:0 1px 2px rgba(0,0,0,.55),0 0 18px rgba(0,0,0,.45)}
+.cap p{color:#c9ccd1}
+.eyebrow{font:600 11px/1 var(--f-mono);letter-spacing:.2em;color:var(--green);text-transform:uppercase}
+.cap h1{margin:8px 0 6px;font:700 clamp(26px,5vw,48px)/1 var(--f-disp);letter-spacing:.01em;text-wrap:balance}
+.stat{font:600 clamp(14px,2.2vw,18px)/1.3 var(--f-mono);font-variant-numeric:tabular-nums;color:var(--fg);display:flex;flex-wrap:wrap;gap:4px 14px}
+.stat span{border-left:2px solid var(--green);padding-left:8px}
+.cap p{margin:10px 0 0;font-size:14px;line-height:1.6;color:var(--mute);max-width:40ch}
+.rail{position:fixed;left:0;right:0;bottom:0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px calc(env(safe-area-inset-bottom,0px) + 14px);background:linear-gradient(to top,rgba(5,6,7,.96) 55%,rgba(5,6,7,0));display:flex;flex-direction:column;gap:8px}
+.row{display:flex;gap:8px;align-items:stretch}
+.ctl{flex:0 0 auto;font:600 13px var(--f-body);color:var(--fg);background:#101317;border:1px solid var(--line);border-radius:4px;padding:0 12px;min-height:40px;cursor:pointer;display:flex;align-items:center;gap:6px}
+.ctl[aria-pressed="true"]{border-color:var(--cool);color:var(--cool)}
+.ctl:disabled{opacity:.35;cursor:default}
+.ctl:focus-visible,.chap:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.chaps{flex:1;min-width:0;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+.chap{flex:1 0 92px;position:relative;text-align:left;background:#0d1013;border:1px solid var(--line);border-radius:4px;color:var(--mute);padding:7px 9px 9px;cursor:pointer;font:12px/1.3 var(--f-body);overflow:hidden}
+.chap b{display:block;font:600 10px var(--f-mono);letter-spacing:.1em;margin-bottom:2px}
+.chap.on{color:var(--fg);border-color:#3a4049}
+.chap i{position:absolute;left:0;bottom:0;height:3px;background:var(--green);width:0}
+.note{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font:11px var(--f-mono);color:var(--mute)}
+@media (max-width:640px){
+  .cap p{display:none}.note .hint{display:none}
+  .cap h1{font-size:clamp(24px,7.2vw,32px)}
+  .stat{font-size:13px}
+  .rail{padding-block:20px calc(env(safe-area-inset-bottom,0px) + 10px);gap:6px}
+  /* phone: chapters get their own swipeable strip; transport controls sit in one even row below */
+  .row{flex-wrap:wrap;gap:6px}
+  .chaps{order:-1;flex:1 0 100%;scroll-snap-type:x mandatory;scroll-padding-left:0;-webkit-overflow-scrolling:touch;mask-image:linear-gradient(to right,#000 85%,transparent)}
+  .chap{flex:0 0 132px;scroll-snap-align:start;padding:6px 9px 8px;font-size:12px}
+  .chap .ct{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .ctl{flex:1 1 0;justify-content:center;min-height:40px;padding:0 6px;font-size:12px;white-space:nowrap}
+  #play{flex:0 0 52px}
+  .note{font-size:10px;line-height:1.4}
+}
+</style>
+
+<canvas id="scene" aria-label="NVIDIA Vera Rubin DSX POD 貨櫃式 AI 工廠 3D 演示"></canvas>
+
+<div class="cap" id="cap">
+  <div class="eyebrow" id="c-eye"></div>
+  <h1 id="c-title"></h1>
+  <div class="stat" id="c-stat"></div>
+  <p id="c-body"></p>
+</div>
+
+<div class="rail">
+  <div class="row">
+    <button class="ctl" id="play" aria-label="Pause">❚❚</button>
+    <div class="chaps" id="chaps" role="group" aria-label="章節"></div>
+    <button class="ctl" id="doors" aria-pressed="false" disabled>開門</button>
+    <button class="ctl" id="xray" aria-pressed="false" disabled>透視</button>
+    <button class="ctl" id="lang" aria-label="Switch language">EN</button>
+  </div>
+  <div class="note"><span id="note-src">數據取自 GTC 主題演講與 NVIDIA 新聞稿（2026/10/21）· 場景為概念示意</span><span class="hint" id="note-hint">拖曳旋轉 · 滾輪/雙指縮放</span></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/objects/Reflector.js"></script>
+<script>
+(()=>{
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const CH=[
+ {t:0, eye:'Vera Rubin NVL72', title:'一座機櫃，一台電腦', stat:['每種工作負載','每個模型'], body:'NVL72 機櫃級系統：以 NVLink 把整櫃 GPU 串成單一運算體。', en:{title:'One Rack, One Computer', stat:['Every workload','Every model'], body:'The NVL72 rack-scale system: NVLink joins every GPU in the rack into a single machine.'}},
+ {t:5, eye:'Rack Line-Up', title:'機櫃組合，完成佈線', stat:['3 組機櫃','運算 · 電源 · 網路'], body:'先把未接線的 NVL72 運算櫃、電源櫃與網路櫃排成三組，再完成機櫃間的金色線纜。', en:{title:'Line Up the Racks, Then Cable', stat:['3 rack groups','Compute · Power · Network'], body:'Uncabled NVL72 compute, power and network racks are lined up in three groups, then the gold rack-to-rack cabling goes in.'}},
+ {t:11,eye:'Vera Rubin NVL72 DSX POD', title:'整櫃整合進貨櫃', stat:['25 exaFLOPS AI','17 km 網路線材'], body:'運算機櫃、網路、配電、消防與液冷管線，在工廠內一次整合。', en:{title:'Integrated Into the Container', stat:['25 exaFLOPS of AI','17 km of networking cable'], body:'Compute racks, networking, power distribution, fire suppression and liquid-cooling piping are integrated in the factory in one pass.'}},
+ {t:18,eye:'Factory-Built · Pre-Tested', title:'封櫃，整台出貨', stat:['28,500 kg','1,000 萬個元件'], body:'機櫃間佈線、配電、液冷與管線都在工廠完成，並在運送前做功能驗證。', en:{title:'Sealed and Shipped Whole', stat:['28,500 kg','10 million components'], body:'Rack-to-rack cabling, power, liquid cooling and piping are completed in the factory and functionally validated before transport.'}},
+ {t:24,eye:'DSX POD Dry Coolers', title:'乾式冷卻器', stat:['零耗水'], body:'冷卻模組直接疊在 POD 上方，以風扇散熱，不消耗水資源。', en:{title:'Dry Coolers', stat:['Zero water consumption'], body:'The cooling module stacks directly on top of the POD and rejects heat with fans, using no water.'}},
+ {t:30,eye:'800 VDC Power Center', title:'800 VDC 電力中心', stat:['供電更多','銅材減少 45%'], body:'高壓直流母線直送 POD，降低轉換損耗與線材用量。', en:{title:'800 VDC Power Center', stat:['More power','45% less copper'], body:'A high-voltage DC busway feeds each POD directly, cutting conversion losses and cable use.'}},
+ {t:36,eye:'NVIDIA DSX PODs', title:'貨櫃就是 AI 工廠', stat:['6 個月 → 最快 14 天','2027 年初全球交付'], body:'在已備妥的場地，部署時間從六個月縮短到最快 14 天，以模組化複製擴展成整座 AI 工廠園區。', en:{title:'The Container Is the AI Factory', stat:['6 months → as little as 14 days','Worldwide delivery early 2027'], body:'At a prepared site, deployment drops from six months to as little as 14 days, and modular PODs scale out into a full AI factory campus.'}},
+];
+const END=46;
+// global time Tn vs. build time: the line-up chapter (Tn 5–11) holds every non-rack build step at 5
+const buildT=Tn=>Tn<5?Tn:Tn<11?5:Tn-6;
+
+// ---------- renderer ----------
+const canvas=document.getElementById('scene');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.outputEncoding=THREE.sRGBEncoding;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=0.95;
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+const scene=new THREE.Scene();scene.background=new THREE.Color('#050607');scene.fog=new THREE.Fog('#050607',35,230);
+const camera=new THREE.PerspectiveCamera(40,1,0.1,900);
+const controls=new THREE.OrbitControls(camera,canvas);
+controls.enableDamping=true;controls.maxPolarAngle=Math.PI*0.48;controls.minDistance=2.5;controls.maxDistance=320;
+
+const hemi=new THREE.HemisphereLight('#dfe8f5','#15110c',0.34);scene.add(hemi);
+const key=new THREE.DirectionalLight('#fff3e2',1.05);key.position.set(10,18,12);key.castShadow=true;
+key.shadow.mapSize.set(2048,2048);Object.assign(key.shadow.camera,{left:-20,right:20,top:20,bottom:-20,near:1,far:70});key.shadow.bias=-0.0004;scene.add(key);
+const fill=new THREE.DirectionalLight('#9cc7ff',0.35);fill.position.set(-12,6,-8);scene.add(fill);
+const inners=[-4,0,4].map(x=>{const l=new THREE.PointLight('#fff1dc',0,9,1.4);l.position.set(x,2.3,0.6);scene.add(l);return l;});
+
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(800,800),new THREE.MeshStandardMaterial({color:'#030304',roughness:1,metalness:0}));
+ground.rotation.x=-Math.PI/2;ground.position.y=-0.03;ground.receiveShadow=true;scene.add(ground);
+const grid=new THREE.GridHelper(400,100,'#0f1114','#0b0c0e');grid.visible=false;scene.add(grid);
+// studio floor: polished black 1.2 m tiles over a soft real-time reflection, with a pool of light under the racks
+const texTile=tex(512,512,(g,w,h)=>{
+  for(let i=0;i<4;i++)for(let j=0;j<4;j++){const v=8+Math.floor(Math.random()*5);g.fillStyle=`rgb(${v},${v+1},${v+3})`;g.fillRect(i*128,j*128,128,128);
+    for(let k=0;k<260;k++){const a=Math.random()*0.05;g.fillStyle=`rgba(255,255,255,${a})`;g.fillRect(i*128+Math.random()*128,j*128+Math.random()*128,1,1);}}
+  g.fillStyle='#17191d';for(let i=0;i<=4;i++){g.fillRect(i*128-1,0,2,h);g.fillRect(0,i*128-1,w,2);}
+  const sh=g.createLinearGradient(0,0,w,h);sh.addColorStop(0,'rgba(255,255,255,.025)');sh.addColorStop(.5,'rgba(255,255,255,0)');sh.addColorStop(1,'rgba(255,255,255,.02)');g.fillStyle=sh;g.fillRect(0,0,w,h);});
+texTile.wrapS=texTile.wrapT=THREE.RepeatWrapping;texTile.repeat.set(800/4.8,800/4.8);
+const floorMat=new THREE.MeshStandardMaterial({map:texTile,color:'#ffffff',roughness:.66,metalness:.12,transparent:true,opacity:.86});
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(800,800),floorMat);floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;scene.add(floor);
+let mirror=null;
+if(THREE.Reflector){const dpr=Math.min(devicePixelRatio,2);
+  mirror=new THREE.Reflector(new THREE.PlaneGeometry(70,46),{textureWidth:Math.round(innerWidth*dpr*0.5),textureHeight:Math.round(innerHeight*dpr*0.5),color:0x50545a});
+  mirror.rotation.x=-Math.PI/2;mirror.position.set(-2,-0.006,-2);scene.add(mirror);}
+const texPool=tex(256,256,(g,w,h)=>{const r=g.createRadialGradient(128,128,0,128,128,128);r.addColorStop(0,'rgba(255,255,255,1)');r.addColorStop(.55,'rgba(255,255,255,.35)');r.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=r;g.fillRect(0,0,w,h);});
+const pool=new THREE.Mesh(new THREE.PlaneGeometry(30,13),new THREE.MeshBasicMaterial({map:texPool,color:'#a9b2bd',transparent:true,opacity:.1,blending:THREE.AdditiveBlending,depthWrite:false}));
+pool.rotation.x=-Math.PI/2;pool.position.set(0,0.004,0.6);scene.add(pool);
+
+// ---------- textures ----------
+function tex(w,h,draw){const c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;t.anisotropy=8;return t;}
+const WHITE='#e7e9ec',GREEN='#74c41e';
+function ribs(g,w,y0,y1,step,light,dark){for(let x=0;x<w;x+=step){g.fillStyle=light;g.fillRect(x,y0,step*0.45,y1-y0);g.fillStyle=dark;g.fillRect(x+step*0.45,y0,2,y1-y0);}}
+function panelDraw(logo){return (g,w,h)=>{
+  g.fillStyle=WHITE;g.fillRect(0,0,w,h);ribs(g,w,0,h*0.7,32,'#eef0f2','#c9cdd2');
+  g.fillStyle=GREEN;g.fillRect(0,h*0.7,w,h*0.3);ribs(g,w,h*0.7,h,32,'#80d127','#5ea312');
+  g.fillStyle='#aeb3ba';g.fillRect(0,0,3,h);g.fillRect(w-3,0,3,h);
+  g.fillStyle='#9aa0a8';g.fillRect(w-36,h*0.46,8,46);g.fillRect(w-40,h*0.12,16,6);g.fillRect(w-40,h*0.86,16,6);
+  if(logo){g.fillStyle='#2a2e35';g.font='700 34px "Saira Semi Condensed", Arial Narrow, sans-serif';g.fillText('DSX POD',26,64);g.fillStyle=GREEN;g.fillRect(26,74,60,5);}
+};}
+const texPanel=tex(256,512,panelDraw(false)), texPanelLogo=tex(256,512,panelDraw(true));
+const texWall=tex(256,512,panelDraw(false));texWall.wrapS=THREE.RepeatWrapping;texWall.repeat.set(12,1);
+function ribSeg(g,x,w,h,step){
+  g.fillStyle=WHITE;g.fillRect(x,0,w,h*0.7);
+  for(let i=x;i<x+w;i+=step){g.fillStyle='#f4f5f7';g.fillRect(i,0,step*0.42,h*0.7);g.fillStyle='#c3c7cc';g.fillRect(i+step*0.42,0,2,h*0.7);}
+  g.fillStyle=GREEN;g.fillRect(x,h*0.7,w,h*0.3);
+  for(let i=x;i<x+w;i+=step){g.fillStyle='#88d630';g.fillRect(i,h*0.7,step*0.42,h*0.3);g.fillStyle='#599b10';g.fillRect(i+step*0.42,h*0.7,2,h*0.3);}
+  g.fillStyle='#a9aeb5';g.fillRect(x,0,2,h);g.fillRect(x+w-2,0,2,h);
+}
+function doorSeg(g,x,w,h){
+  const gr=g.createLinearGradient(x,0,x+w,0);gr.addColorStop(0,'#eef0f2');gr.addColorStop(1,'#dde0e4');
+  g.fillStyle=gr;g.fillRect(x,0,w,h*0.7);g.fillStyle=GREEN;g.fillRect(x,h*0.7,w,h*0.3);
+  g.fillStyle='rgba(0,0,0,.07)';g.fillRect(x,h*0.7,w,3);
+  g.fillStyle='#aab0b7';g.fillRect(x,0,3,h);g.fillRect(x+w-3,0,3,h);g.fillRect(x,0,w,3);g.fillRect(x,h-3,w,3);
+}
+function logoMark(g,x){g.fillStyle='#2a2e35';g.font='700 30px "Saira Semi Condensed", Arial Narrow, sans-serif';g.fillText('DSX POD',x+22,58);g.fillStyle=GREEN;g.fillRect(x+22,68,54,5);}
+const texEnd=tex(256,512,(g,w,h)=>ribSeg(g,0,w,h,18));
+const texBase=tex(1024,32,(g,w,h)=>{g.fillStyle='#8f959d';g.fillRect(0,0,w,h);g.fillStyle='#6f757d';g.fillRect(0,0,w,3);g.fillRect(0,h-3,w,3);
+  g.fillStyle='#1b1d21';[0.07,0.15,0.85,0.93].forEach(f=>g.fillRect(f*w-22,8,44,h-14));});
+const texLouver=tex(512,256,(g,w,h)=>{
+  g.fillStyle=WHITE;g.fillRect(0,0,w,h);
+  for(let i=0;i<5;i++){const x=14+i*100;g.fillStyle='#4a4f57';g.fillRect(x,30,84,120);
+    g.fillStyle='#d5d8dc';for(let s=0;s<10;s++)g.fillRect(x+4,36+s*11.5,76,5);}
+  ribs(g,w,165,h,24,'#eceef0','#c5c9ce');
+  g.fillStyle='#aeb3ba';g.fillRect(0,160,w,3);
+});
+texLouver.wrapS=THREE.RepeatWrapping;
+const texLouverHero=texLouver.clone();texLouverHero.needsUpdate=true;texLouverHero.repeat.set(2.4,1);
+const texFanTop=tex(512,128,(g,w,h)=>{g.fillStyle='#cfd3d8';g.fillRect(0,0,w,h);
+  for(let i=0;i<6;i++)for(let j=0;j<2;j++){g.fillStyle='#24272c';g.beginPath();g.arc(43+i*85,32+j*64,27,0,7);g.fill();g.fillStyle='#4a4f57';g.beginPath();g.arc(43+i*85,32+j*64,7,0,7);g.fill();}});
+// power center skin from the keynote: corrugated white shell, two columns of three stacked panel doors with pull handles
+const texPower=tex(512,256,(g,w,h)=>{g.fillStyle='#e4e6e9';g.fillRect(0,0,w,h);
+  for(let x=0;x<w;x+=12){g.fillStyle='#f1f2f4';g.fillRect(x,0,5,h);g.fillStyle='#c6cacf';g.fillRect(x+5,0,2,h);}
+  g.fillStyle='#b3b8be';g.fillRect(0,0,w,4);g.fillRect(0,h-6,w,6);g.fillRect(0,0,4,h);g.fillRect(w-4,0,4,h);
+  [[120,0],[262,1]].forEach(([x0])=>{g.fillStyle='#aab0b7';g.fillRect(x0-14,8,6,h-16);
+    for(let r=0;r<3;r++){const y=40+r*66;g.fillStyle='#eceef0';g.fillRect(x0,y,130,52);g.strokeStyle='#a9aeb5';g.lineWidth=2;g.strokeRect(x0,y,130,52);
+      g.fillStyle='#d6d9dd';g.fillRect(x0+4,y+4,122,8);g.fillStyle='#8e949b';g.fillRect(x0+52,y+30,26,5);}});
+  g.fillStyle='#aab0b7';g.fillRect(400,8,6,h-16);});
+function cables(g,count,x0,dir){for(let i=0;i<count;i++){const y=26+(i/count)*460;
+  g.strokeStyle=`hsl(${36+Math.random()*10},92%,${46+Math.random()*20}%)`;g.lineWidth=2+Math.random();
+  g.beginPath();g.moveTo(x0,y);const r=30+Math.random()*24;g.bezierCurveTo(x0+dir*r,y-8,x0+dir*r,36,x0+dir*(8+Math.random()*26),8);g.stroke();}}
+const texCompute=tex(256,512,(g,w,h)=>{g.fillStyle='#090a0c';g.fillRect(0,0,w,h);
+  for(let i=0;i<20;i++){const y=24+i*23;g.fillStyle=(i===9||i===10)?'#2b2f36':'#cfd2d7';g.fillRect(74,y,108,16);
+    g.fillStyle='#202329';for(let k=0;k<5;k++)g.fillRect(82+k*17,y+5,11,6);g.fillStyle='#9dff4a';g.fillRect(172,y+6,4,4);}
+  cables(g,30,74,-1);cables(g,30,182,1);});
+const texNet=tex(256,512,(g,w,h)=>{g.fillStyle='#090a0c';g.fillRect(0,0,w,h);
+  for(let i=0;i<14;i++){const y=60+i*30;g.fillStyle='#2a2d33';g.fillRect(40,y,176,10);g.fillStyle='#3ec5ff';for(let k=0;k<16;k++)g.fillRect(46+k*10.5,y+3,4,4);}
+  cables(g,70,40,-1);cables(g,70,216,1);});
+const texElec=tex(256,512,(g,w,h)=>{g.fillStyle='#dfe2e6';g.fillRect(0,0,w,h);g.fillStyle='#c4c8ce';g.fillRect(14,14,w-28,h-28);
+  for(let r=0;r<6;r++)for(let c=0;c<3;c++){const x=40+c*64,y=150+r*50;g.fillStyle='#565b63';g.fillRect(x,y,44,32);
+    g.fillStyle=['#e8382f','#f2c23a','#7ccf22'][(r+c)%3];g.beginPath();g.arc(x+22,y+16,6,0,7);g.fill();}
+  g.fillStyle='#9fd6ff';g.fillRect(50,46,156,56);});
+const texCDU=tex(256,512,(g,w,h)=>{g.fillStyle='#d9dde2';g.fillRect(0,0,w,h);g.strokeStyle='#3e7fb0';g.lineWidth=4;
+  for(let i=0;i<3;i++){const cy=110+i*130;g.beginPath();g.arc(128,cy,50,0,7);g.stroke();for(let k=0;k<6;k++){g.beginPath();g.moveTo(128,cy);g.lineTo(128+Math.cos(k)*46,cy+Math.sin(k)*46);g.stroke();}}
+  g.fillStyle='#2a2e35';g.font='bold 24px monospace';g.fillText('CDU',102,494);});
+
+// ---------- materials ----------
+const shellMats=[];
+function shell(m){m.transparent=true;shellMats.push(m);return m;}
+const M={
+  white:shell(new THREE.MeshStandardMaterial({color:'#e9ebee',roughness:.55,metalness:.15})),
+  postGreen:new THREE.MeshStandardMaterial({color:'#6fbf1c',roughness:.5,metalness:.2}),
+  inner:shell(new THREE.MeshStandardMaterial({color:'#3a3d42',roughness:.8,metalness:.1})),
+  frame:new THREE.MeshStandardMaterial({color:'#c8ccd1',roughness:.4,metalness:.5}),
+  base:new THREE.MeshStandardMaterial({color:'#8d939b',roughness:.5,metalness:.6}),
+  deck:new THREE.MeshStandardMaterial({color:'#2a2c30',roughness:.85}),
+  dark:new THREE.MeshStandardMaterial({color:'#15171b',roughness:.45,metalness:.6}),
+  red:new THREE.MeshStandardMaterial({color:'#d22a22',roughness:.35,metalness:.3,emissive:'#5a0905',emissiveIntensity:.6}),
+  panel:shell(new THREE.MeshStandardMaterial({map:texPanel,roughness:.55,metalness:.1})),
+  panelLogo:shell(new THREE.MeshStandardMaterial({map:texPanelLogo,roughness:.55,metalness:.1})),
+  wall:shell(new THREE.MeshStandardMaterial({map:texWall,roughness:.55,metalness:.1})),
+  end:shell(new THREE.MeshStandardMaterial({map:texEnd,roughness:.55,metalness:.1})),
+  louver:new THREE.MeshStandardMaterial({map:texLouverHero,roughness:.6,metalness:.1}),
+  fanHousing:new THREE.MeshStandardMaterial({color:'#2a2d33',roughness:.5,metalness:.6}),
+  blade:new THREE.MeshStandardMaterial({color:'#4d535c',roughness:.4,metalness:.5}),
+  power:new THREE.MeshStandardMaterial({map:texPower,roughness:.6,metalness:.1}),
+  bus:new THREE.MeshStandardMaterial({color:'#24272c',roughness:.4,metalness:.7}),
+  rackC:new THREE.MeshStandardMaterial({map:texCompute,emissiveMap:texCompute,emissive:'#ffffff',emissiveIntensity:.25,roughness:.6}),
+  rackN:new THREE.MeshStandardMaterial({map:texNet,emissiveMap:texNet,emissive:'#ffffff',emissiveIntensity:.25,roughness:.6}),
+};
+const box=(w,h,d,m)=>new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);
+
+// ---------- hero POD ----------
+const L=12.2,W=2.44,H=2.9,B=0.16,WH=H-B;
+// side facade: ribbed logo bay, then three pairs of hinged doors split by ribbed pilasters
+const FACADE=(()=>{const avail=L-0.32,rib0=2.75,strip=0.75,dw=(avail-rib0-2*strip)/6;
+  return [['R',rib0,1],['D',dw],['D',dw],['R',strip],['D',dw],['D',dw],['R',strip],['D',dw],['D',dw]];})();
+function segTex(t,w,logo){const pw=Math.round(w*170);return tex(pw,512,(g,cw,h)=>{t==='R'?ribSeg(g,0,cw,h,18):doorSeg(g,0,cw,h);if(logo)logoMark(g,0);});}
+function facadeTex(){const k=2048/L;return tex(2048,512,(g,cw,h)=>{g.fillStyle='#8f959d';g.fillRect(0,0,cw,h);let x=0.16*k;
+  const top=h*0.03,hh=h*0.92;g.save();g.translate(0,top);
+  FACADE.forEach(([t,w,logo])=>{const pw=w*k;const c=document.createElement('canvas');c.width=Math.max(4,Math.round(pw));c.height=512;const cg=c.getContext('2d');
+    t==='R'?ribSeg(cg,0,c.width,512,18):doorSeg(cg,0,c.width,512);if(logo)logoMark(cg,0);g.drawImage(c,x,0,pw,hh);x+=pw;});g.restore();});}
+const hero=new THREE.Group();scene.add(hero);
+const anim=[]; // {o, a, b, off, mode}
+function part(o,a,b,off){o.userData.base=o.position.clone();anim.push({o,a,b,off:off||new THREE.Vector3()});hero.add(o);return o;}
+const v3=(x,y,z)=>new THREE.Vector3(x,y,z);
+
+// structure (ch1)
+const mBaseF=new THREE.MeshStandardMaterial({map:texBase,roughness:.5,metalness:.5});const baseF=new THREE.Mesh(new THREE.BoxGeometry(L,B,W),[M.base,M.base,M.base,M.base,mBaseF,mBaseF]);baseF.position.y=B/2;part(baseF,5,6.1,v3(0,-1.5,0));
+const deck=box(L-0.2,0.02,W-0.2,M.deck);deck.position.y=B+0.01;part(deck,5,6.1,v3(0,-1.5,0));
+[[-1,-1],[-1,1],[1,-1],[1,1]].forEach(([sx,sz])=>{const p=new THREE.Group();const up=box(0.16,H*0.7,0.16,M.frame);up.position.y=H*0.65;const lo=box(0.162,H*0.3,0.162,M.postGreen);lo.position.y=H*0.15;p.add(up,lo);
+  p.position.set(sx*(L/2-0.08),0,sz*(W/2-0.08));part(p,5.2,6.2,v3(0,4,0));
+  const c=box(0.22,0.18,0.22,M.base);c.position.set(sx*(L/2-0.08),H-0.05,sz*(W/2-0.08));part(c,5.2,6.2,v3(0,4,0));});
+[-1,1].forEach(sz=>{const r=box(L,0.14,0.12,M.frame);r.position.set(0,H-0.07,sz*(W/2-0.06));part(r,5.3,6.3,v3(0,4,0));});
+[-1,1].forEach(sx=>{const e=new THREE.Mesh(new THREE.BoxGeometry(0.05,WH,W-0.3),(sx<0?[M.inner,M.end,M.white,M.white,M.white,M.white]:[M.end,M.inner,M.white,M.white,M.white,M.white]));e.position.set(sx*(L/2-0.04),B+WH/2,0);part(e,5.4,6.4,v3(sx*3,0,0));});
+
+// interior: matches the keynote cutaway, left to right:
+// switchgear · control panel · suppression cylinder · [3× NVL72 + power rack] · aisle · [4× NVL72] · aisle · [power rack + network ×3]
+const RZ=-0.55,RH=2.35,RW=0.6,RY=B+0.02+RH/2;
+const xm=m=>-L/2+0.12+m;
+function strands(g,x0,x1,h,n,wav){for(let i=0;i<n;i++){const x=x0+(x1-x0)*(i+0.5)/n;
+  g.strokeStyle=`hsl(${40+Math.random()*10},${80+Math.random()*15}%,${42+Math.random()*22}%)`;g.lineWidth=1.6+Math.random()*1.2;
+  g.beginPath();g.moveTo(x,h);for(let y=h;y>=0;y-=16)g.lineTo(x+Math.sin(y*0.05+i)*wav,y);g.stroke();}}
+// cable look: each strand drawn as a shaded tube (dark core shadow, mustard body, faint sheen), at 2× resolution
+function texHi(w,h,draw){return tex(w*2,h*2,(g)=>{g.scale(2,2);draw(g,w,h);});}
+function cableStroke(g){const c=g.strokeStyle,w=g.lineWidth;g.lineCap='round';
+  g.strokeStyle='rgba(18,12,2,.85)';g.lineWidth=w+1.3;g.stroke();
+  g.strokeStyle=c;g.lineWidth=w;g.stroke();
+  g.strokeStyle='rgba(255,236,160,.28)';g.lineWidth=Math.max(.4,w*.28);g.stroke();
+  g.strokeStyle=c;g.lineWidth=w;}
+// rack fronts: cable dress traced from the keynote cutaway
+const gold=()=>`hsl(${45+Math.random()*7},${72+Math.random()*16}%,${38+Math.random()*14}%)`;
+function bundle(g,pts,n,spread,w){for(let i=0;i<n;i++){const o=(i/(n-1)-0.5)*spread;g.strokeStyle=gold();g.lineWidth=w||1.8;g.beginPath();
+  pts.forEach(([x,y,nx,ny],k)=>{const px=x+nx*o,py=y+ny*o;k?g.lineTo(px,py):g.moveTo(px,py);});cableStroke(g);}}
+function racetrack(x0,y0,x1,y1,r){const p=[];const seg=(a,b,c,d,nx,ny)=>{for(let t=0;t<=1;t+=0.1)p.push([a+(c-a)*t,b+(d-b)*t,nx,ny]);};
+  seg(x0,y1,x0,y0+r,-1,0);
+  for(let a=Math.PI;a<=Math.PI*2+0.01;a+=0.12){const cx=(x0+x1)/2,rx=(x1-x0)/2;p.push([cx+Math.cos(a)*rx,y0+r+Math.sin(a)*r,Math.cos(a),Math.sin(a)]);}
+  seg(x1,y0+r,x1,y1,1,0);return p;}
+function frame(g,w,h){g.fillStyle='#060607';g.fillRect(0,0,w,h);g.fillStyle='#141518';g.fillRect(0,0,10,h);g.fillRect(w-10,0,10,h);g.fillRect(0,h-26,w,26);}
+// ---- rack fronts, redrawn from the developer.nvidia.com close-ups (one shared racetrack frame, three cable layouts) ----
+// texture space 256×512; bundle runs from the top rail to ~80% height, empty black bay below
+const RT={x0:28,x1:228,top:10,bot:412,r:30};
+function rackShell(g,w,h){
+  g.fillStyle='#040405';g.fillRect(0,0,w,h);
+  g.fillStyle='#1c1e22';g.fillRect(0,0,9,h);g.fillRect(w-9,0,9,h);g.fillRect(0,0,w,8);
+  g.fillStyle='#0f1012';for(let y=430;y<h-8;y+=10)for(let k=0;k<12;k++)g.fillRect(40+k*15,y,3,2);   // empty lower bay
+}
+function lip(g,y,hh){const gr=g.createLinearGradient(0,y,0,y+hh);gr.addColorStop(0,'#e4dfd0');gr.addColorStop(1,'#a59f8c');g.fillStyle=gr;g.fillRect(38,y,180,hh);}
+function racetrackBundle(g,n=12){
+  const {x0,x1,top,bot,r}=RT,cx=(x0+x1)/2;
+  for(let i=0;i<n;i++){const o=(i/(n-1)-0.5)*13,rx=(x1-x0)/2+o;g.strokeStyle=gold();g.lineWidth=2;g.beginPath();
+    g.moveTo(cx-rx+18,2);g.quadraticCurveTo(cx-rx,6,cx-rx,top+30);g.lineTo(cx-rx,bot-r);
+    g.ellipse(cx,bot-r,rx,r*0.55+o*0.35,0,Math.PI,0,true);g.lineTo(cx+rx,top+30);g.quadraticCurveTo(cx+rx,6,cx+rx-18,2);cableStroke(g);}
+  g.fillStyle='#0a0a0b';for(let y=46;y<bot-30;y+=34){g.fillRect(x0-9,y,18,3);g.fillRect(x1-9,y,18,3);}   // velcro clips
+}
+// NVL72 compute: tray stack, two jumper fans from the side bundles into the ports, a bare switch-tray band between
+const texNVL=texHi(256,512,(g,w,h)=>{
+  rackShell(g,w,h);
+  lip(g,30,8);
+  g.fillStyle='#0d0e10';g.fillRect(40,44,176,58);
+  for(let k=0;k<20;k++){g.fillStyle=k%6===3?'#5e7d24':'#24262a';g.fillRect(48+k*8.2,70,4,4);}
+  lip(g,102,5);
+  for(let y=112;y<404;y+=7){const bare=y>=238&&y<304;g.fillStyle=bare?'#d4cebc':'#9e9784';g.fillRect(40,y,176,5);
+    g.fillStyle='#2f2c25';if(bare){for(let k=0;k<4;k++)g.fillRect(46+k*9,y+1,6,3);g.fillRect(150,y+2,22,1);}else for(let k=0;k<6;k++)g.fillRect(60+k*26,y+1,8,3);}
+  lip(g,404,6);
+  const fan=(y0,y1)=>{for(let y=y0;y<y1;y+=5){[0,1].forEach(side=>{const sx=side?226:30,dir=side?-1:1,ex=sx+dir*(46+Math.random()*30);
+    g.strokeStyle=gold();g.lineWidth=1.1;g.beginPath();g.moveTo(sx,y-14);g.bezierCurveTo(sx+dir*14,y+6,ex-dir*16,y+8,ex,y+2);cableStroke(g);});}};
+  fan(118,236);fan(306,402);
+  racetrackBundle(g);
+});
+// network (outer): nested sagging loops in the upper half, trays with short sags below
+const texNetFull=texHi(256,512,(g,w,h)=>{
+  rackShell(g,w,h);
+  lip(g,30,7);
+  for(let i=0;i<34;i++){const y=44+i*4.4;g.strokeStyle=gold();g.lineWidth=1.5;g.beginPath();
+    g.moveTo(32,y);g.bezierCurveTo(70,y+26,186,y+26,224,y);cableStroke(g);}
+  for(let y=206;y<404;y+=20){lip(g,y,5);
+    for(let q=0;q<4;q++){g.strokeStyle=gold();g.lineWidth=1.5;g.beginPath();const yy=y+6+q*3;g.moveTo(32,yy-6);g.bezierCurveTo(64,yy+10,192,yy+10,224,yy-6);cableStroke(g);}}
+  lip(g,404,6);
+  racetrackBundle(g);
+});
+// network (centre): open upper bay with one switch, then a funnel of loops converging at the centre
+const texNetSw=texHi(256,512,(g,w,h)=>{
+  rackShell(g,w,h);
+  lip(g,30,7);
+  for(let i=0;i<6;i++){const y=48+i*5;g.strokeStyle=gold();g.lineWidth=1.4;g.beginPath();g.moveTo(32,y);g.quadraticCurveTo(48,y+30,64,y+44);cableStroke(g);
+    g.beginPath();g.moveTo(224,y);g.quadraticCurveTo(208,y+30,192,y+44);cableStroke(g);}
+  const gr=g.createLinearGradient(0,132,0,154);gr.addColorStop(0,'#dad6ca');gr.addColorStop(1,'#8f8a7b');g.fillStyle=gr;g.fillRect(64,132,128,22);
+  g.fillStyle='#2b2a26';for(let k=0;k<10;k++)g.fillRect(70+k*11,140,7,5);g.fillStyle='#9fd6ff';g.fillRect(168,138,14,8);
+  for(let i=0;i<5;i++){const y=158+i*4;g.strokeStyle=gold();g.lineWidth=1.4;g.beginPath();g.moveTo(34,y);g.bezierCurveTo(80,y+12,176,y+12,222,y);cableStroke(g);}
+  lip(g,184,6);
+  for(let i=0;i<40;i++){const y=196+i*5.2;g.strokeStyle=gold();g.lineWidth=1.5;g.beginPath();
+    g.moveTo(32,y);g.bezierCurveTo(60,y+44,196,y+44,224,y);cableStroke(g);}
+  lip(g,404,6);
+  racetrackBundle(g);
+});
+const texPwrRack=texHi(256,512,(g,w,h)=>{frame(g,w,h);g.fillStyle='#121316';g.fillRect(14,10,w-28,h-40);
+  g.fillStyle='#9fd6ff';g.fillRect(150,140,46,20);
+  for(let r=0;r<5;r++)for(let c=0;c<2;c++){const x=92+c*72,y=88+r*76+(c?0:0);g.fillStyle='#040405';g.beginPath();g.arc(x,y+(r>0?40:0),24,0,7);g.fill();
+    g.strokeStyle='#2c2f35';g.lineWidth=2;g.stroke();g.strokeStyle='#1e2024';for(let k=0;k<4;k++){g.beginPath();g.moveTo(x,y+(r>0?40:0));g.lineTo(x+Math.cos(k*1.57+.4)*20,y+(r>0?40:0)+Math.sin(k*1.57+.4)*20);g.stroke();}}});
+const texSwitchgear=tex(256,512,(g,w,h)=>{g.fillStyle='#e6e8eb';g.fillRect(0,0,w,h);
+  [[8,8,240,496]].forEach(([x,y,ww,hh])=>{g.strokeStyle='#b5bac0';g.lineWidth=3;g.strokeRect(x,y,ww,hh);});
+  g.strokeStyle='#c4c8cd';g.lineWidth=2;g.beginPath();g.moveTo(128,8);g.lineTo(128,504);g.stroke();
+  for(let i=0;i<10;i++){g.fillStyle='#b9bec4';g.fillRect(30,40+i*9,70,4);g.fillRect(156,40+i*9,70,4);}
+  for(let i=0;i<10;i++){g.fillStyle='#b9bec4';g.fillRect(30,400+i*9,70,4);g.fillRect(156,400+i*9,70,4);}
+  g.fillStyle='#d93a2b';g.fillRect(150,200,40,22);g.fillStyle='#8e949b';g.fillRect(112,230,6,60);g.fillRect(138,230,6,60);
+  g.strokeStyle='#555a61';g.lineWidth=3;g.beginPath();g.moveTo(40,180);g.bezierCurveTo(20,260,60,300,30,380);g.stroke();});
+const texControl=tex(256,512,(g,w,h)=>{g.fillStyle='#2a2d33';g.fillRect(0,0,w,h);g.strokeStyle='#4a4f57';g.lineWidth=3;g.strokeRect(6,6,w-12,h-12);
+  g.fillStyle='#cfe7ff';g.fillRect(40,40,70,46);g.fillRect(146,40,70,46);g.fillStyle='#e9eef2';g.fillRect(40,110,176,30);
+  for(let r=0;r<5;r++)for(let c=0;c<4;c++){g.fillStyle=['#e8382f','#e9eef2','#7ccf22','#f2c23a'][(r*3+c)%4];g.beginPath();g.arc(56+c*48,180+r*60,10,0,7);g.fill();g.fillStyle='#d6dade';g.fillRect(46+c*48,198+r*60,20,6);}});
+const mk=(t,emi)=>new THREE.MeshStandardMaterial({map:t,roughness:.6,emissiveMap:emi?t:null,emissive:emi?'#ffffff':'#000000',emissiveIntensity:emi?.25:0});
+M.rackC=mk(texNVL,true);M.rackN=mk(texNetFull,true);
+const MAT={C:M.rackC,P:mk(texPwrRack,false),F:M.rackN,S:mk(texNetSw,true)};
+const texStrand=tex(64,64,(g,w,h)=>{for(let y=0;y<h;y+=2){g.fillStyle=gold();g.fillRect(0,y,w,2);}g.fillStyle='rgba(0,0,0,.35)';for(let y=0;y<h;y+=8)g.fillRect(0,y,w,1);});
+texStrand.wrapS=texStrand.wrapT=THREE.RepeatWrapping;texStrand.repeat.set(2,2);
+const goldArch=new THREE.MeshStandardMaterial({map:texStrand,color:'#ffffff',roughness:.7,metalness:.05,emissive:'#1a1403',emissiveIntensity:.4});
+const stubGeo=new THREE.TorusGeometry(0.15,0.034,10,24,Math.PI);
+// uncabled machines, as first shown in the keynote: open black cabinet, champagne tray stack, gold NVLink spine module on top
+const texNVLBare=texHi(256,512,(g,w,h)=>{
+  g.fillStyle='#050506';g.fillRect(0,0,w,h);g.fillStyle='#202226';g.fillRect(0,0,10,h);g.fillRect(w-10,0,10,h);g.fillRect(0,0,w,10);
+  const gr=g.createLinearGradient(56,0,200,0);gr.addColorStop(0,'#8a7a52');gr.addColorStop(.5,'#d8c9a0');gr.addColorStop(1,'#8a7a52');
+  g.fillStyle=gr;g.fillRect(58,28,140,26);g.fillStyle='#3a3424';for(let k=0;k<8;k++)g.fillRect(66+k*16,36,10,10);
+  for(let y=62;y<430;y+=7){const sw=y>=196&&y<262;g.fillStyle=sw?'#cdbf96':'#b9aa80';g.fillRect(52,y,152,5);g.fillStyle='#4a4130';for(let k=0;k<9;k++)g.fillRect(58+k*16,y+1,7,3);}
+  g.fillStyle='rgba(0,0,0,.25)';g.fillRect(52,62,10,368);g.fillRect(194,62,10,368);
+  g.fillStyle='#16171a';for(let y=444;y<h-6;y+=11)for(let k=0;k<12;k++)g.fillRect(40+k*15,y,3,2);});
+const texNetBare=texHi(256,512,(g,w,h)=>{
+  g.fillStyle='#050506';g.fillRect(0,0,w,h);g.fillStyle='#202226';g.fillRect(0,0,10,h);g.fillRect(w-10,0,10,h);g.fillRect(0,0,w,10);
+  for(let y=30;y<470;y+=22){g.fillStyle='#b9aa80';g.fillRect(40,y,176,9);g.fillStyle='#3a3426';for(let k=0;k<16;k++)g.fillRect(46+k*10.5,y+3,5,3);}
+  [[40,40],[190,30]].forEach(([y,hh])=>{g.fillStyle='#16171a';g.fillRect(36,y,184,hh);g.fillStyle='#9fd6ff';g.fillRect(112,y+hh/2-5,32,10);});});
+const racks=[];let HERO=0,order=0;
+[[2.25,'CCCP'],[5.72,'CCCC'],[9.05,'PFSF']].forEach(([m0,codes],gi)=>codes.split('').forEach((k,j)=>{
+  const r=new THREE.Group();
+  const cabled=MAT[k],bare=k==='C'?texNVLBare:(k==='P'?null:texNetBare);
+  const front=bare?new THREE.MeshStandardMaterial({map:bare,emissiveMap:bare,emissive:'#ffffff',emissiveIntensity:.05,roughness:.6}):cabled;
+  r.add(new THREE.Mesh(new THREE.BoxGeometry(RW-0.02,RH,1.2),[M.dark,M.dark,M.dark,M.dark,front,M.dark]));
+  r.userData.rack={kind:k,front,bare,cabled,stubs:[],at:8.6+order*0.14};
+  if(k!=='P')[-1,1].forEach(sd=>{
+    // arc endpoint 'π' sits on the front leg; the arc rises and runs inward + rearward
+    const dir=new THREE.Vector3(-sd*0.32,0,-0.95),R=0.15;
+    const st=new THREE.Mesh(stubGeo,goldArch);st.rotation.y=Math.atan2(-dir.z,dir.x);st.scale.y=0.9;
+    st.position.set(sd*0.222+dir.x*R,RH/2-0.01,0.6+dir.z*R);r.add(st);r.userData.rack.stubs.push(st);});
+  r.position.set(xm(m0+j*RW+RW/2),RY,RZ);
+  if(gi===1&&j===0){HERO=racks.length;part(r,0.3,1.6,v3(0,2.5,0));}
+  else part(r,5.6+order*0.17,6.5+order*0.17,v3(0,0,4));
+  anim[anim.length-1].useN=true;order++;racks.push(r);
+}));
+// switchgear against left end wall
+const mSG=new THREE.MeshStandardMaterial({map:texSwitchgear,roughness:.5,metalness:.15});
+const sg=new THREE.Mesh(new THREE.BoxGeometry(0.75,2.5,2.1),[mSG,M.white,M.white,M.white,mSG,mSG]);
+sg.position.set(xm(0.42),B+1.26,0);part(sg,6,7,v3(-3,0,0));
+// control panel on legs
+const cp=new THREE.Group();
+cp.add(new THREE.Mesh(new THREE.BoxGeometry(0.62,1.55,0.32),[M.dark,M.dark,M.dark,M.dark,new THREE.MeshStandardMaterial({map:texControl,roughness:.5}),M.dark]));
+[[-0.26,-0.1],[0.26,-0.1],[-0.26,0.1],[0.26,0.1]].forEach(([x,z])=>{const l=box(0.04,0.45,0.04,M.dark);l.position.set(x,-1.0,z);cp.add(l);});
+[-0.18,-0.06,0.06].forEach(x=>{const c=new THREE.Mesh(new THREE.CylinderGeometry(0.025,0.025,0.7,8),M.dark);c.position.set(x,1.12,-0.05);cp.add(c);});
+cp.position.set(xm(1.3),B+0.45+0.775,-0.75);part(cp,6.2,7.1,v3(0,0,3));
+// twin gas-suppression cylinders on a manifold, riser to the overhead main, alarm box on the back wall
+const fs=new THREE.Group();
+[-0.18,0.18].forEach(dx=>{
+  const cyl=new THREE.Mesh(new THREE.CylinderGeometry(0.15,0.15,1.15,24),M.red);cyl.position.set(dx,0.58,0);fs.add(cyl);
+  const dome=new THREE.Mesh(new THREE.SphereGeometry(0.15,20,10,0,Math.PI*2,0,Math.PI/2),M.red);dome.position.set(dx,1.15,0);fs.add(dome);
+  const valve=box(0.09,0.1,0.09,M.base);valve.position.set(dx,1.33,0);fs.add(valve);
+  const lab=box(0.12,0.2,0.01,new THREE.MeshStandardMaterial({color:'#e9ebee'}));lab.position.set(dx,0.65,0.15);fs.add(lab);
+  const hose=new THREE.Mesh(new THREE.CylinderGeometry(0.022,0.022,0.25,8),M.red);hose.position.set(dx,1.48,0);fs.add(hose);});
+const man=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,0.42,8),M.red);man.rotation.z=Math.PI/2;man.position.y=1.6;fs.add(man);
+const riser=new THREE.Mesh(new THREE.CylinderGeometry(0.035,0.035,0.92,10),M.red);riser.position.y=2.06;fs.add(riser);
+fs.position.set(xm(1.9),B,-0.2);part(fs,8.4,9.3,v3(0,3,0));
+const alarm=box(0.32,0.38,0.12,M.red);alarm.position.set(xm(1.95),1.95,-1.1);part(alarm,8.5,9.3,v3(0,0,-1));
+// overhead: red suppression main + dark cable trays and conduits hung from the top rails
+function pipeX(len,r,y,z,m){const p=new THREE.Mesh(new THREE.CylinderGeometry(r,r,len,14),m||M.red);p.rotation.z=Math.PI/2;p.position.set(0,y,z);return p;}
+const mainLen=xm(11.75)-xm(1.9),mainX=(xm(11.75)+xm(1.9))/2;
+const rp=pipeX(mainLen,0.045,2.68,-0.35);rp.position.x=mainX;part(rp,8.8,9.8,v3(0,2,0));
+const trayC=box(L-0.8,0.08,0.45,M.dark);trayC.position.set(0.15,2.78,-0.75);part(trayC,8.6,9.6,v3(0,2,0));
+const bp=pipeX(L-1.0,0.05,2.78,-0.2,M.dark);bp.position.x=0.2;part(bp,8.7,9.7,v3(0,2,0));
+const bp2=pipeX(L-1.0,0.06,2.8,0.15,M.dark);bp2.position.x=0.2;part(bp2,8.75,9.75,v3(0,2,0));
+const trayF=box(L-1.2,0.06,0.35,M.dark);trayF.position.set(0.3,2.72,0.55);part(trayF,8.8,9.8,v3(0,2,0));
+for(let i=0;i<13;i++){const x=-5.2+i*0.9;[-0.75,0.55].forEach(z=>{const rod=box(0.018,0.14,0.018,M.dark);rod.position.set(x,2.82,z);part(rod,9.0,9.8,v3(0,2,0));});}
+for(let i=0;i<5;i++){const b=new THREE.Mesh(new THREE.CylinderGeometry(0.028,0.028,0.85,8),M.red);b.rotation.x=Math.PI/2;b.position.set(xm(3.4+i*1.9),2.68,-0.75);part(b,9.1,9.9,v3(0,2,0));}
+for(let i=0;i<4;i++){const f=box(0.08,0.12,0.08,M.base);f.position.set(-0.6+i*0.25,2.74,-0.25);part(f,9.2,9.9,v3(0,2,0));}
+for(let i=0;i<6;i++){const d=new THREE.Mesh(new THREE.CylinderGeometry(0.022,0.022,0.18,8),M.red);d.position.set(xm(3+i*1.7),2.58,-0.35);part(d,9.2,9.9,v3(0,2,0));}
+[-0.1,0.06].forEach(dx=>{const v=new THREE.Mesh(new THREE.CylinderGeometry(0.025,0.025,0.9,8),M.red);v.position.set(xm(1.6)+dx,2.15,-0.85);part(v,8.9,9.8,v3(0,2,0));});
+
+// shell close-up (ch2)
+const roof=new THREE.Mesh(new THREE.BoxGeometry(L-0.1,0.06,W-0.1),[M.white,M.white,M.white,M.inner,M.white,M.white]);roof.position.y=H+0.0;part(roof,12,13,v3(0,4,0));
+const doors=[];
+function facade(zs){
+  let x=-L/2+0.16;const z=zs*(W/2-0.04);
+  FACADE.forEach(([t,w,logo],i)=>{
+    const m=shell(new THREE.MeshStandardMaterial({map:segTex(t,w,logo&&zs>0),roughness:t==='D'?.4:.55,metalness:.12}));
+    const mats=zs>0?[M.white,M.white,M.white,M.white,m,M.inner]:[M.white,M.white,M.white,M.white,M.inner,m];
+    const mesh=new THREE.Mesh(new THREE.BoxGeometry(w-0.014,WH,0.06),mats);
+    const a=zs>0?12.4+i*0.32:5.4, off=zs>0?v3(0,1.8,3.2):v3(0,0,-3);
+    if(t==='D'&&zs>0){
+      // each pair opens as double doors: first hinged left, second hinged right
+      const dir=doors.length%2===0?1:-1;
+      const piv=new THREE.Group();piv.position.set(dir>0?x:x+w,B+WH/2,z);mesh.position.x=dir*w/2;piv.add(mesh);
+      const hx=dir*0.035,lx=dir*(w-0.12);
+      [0.36,0.02,-0.36].forEach(fy=>{const h=box(0.05,0.13,0.05,M.frame);h.position.set(hx,fy*WH,0.05);piv.add(h);});
+      const hd=box(0.16,0.035,0.035,M.frame);hd.position.set(dir*(w-0.22),-0.06,0.05);piv.add(hd);
+      const lk=box(0.03,0.22,0.03,M.frame);lk.position.set(lx,-0.06,0.05);piv.add(lk);
+      piv.userData.dir=dir;doors.push(piv);part(piv,a,a+0.9,off);
+    }else{mesh.position.set(x+w/2,B+WH/2,z);part(mesh,a,a+0.9,off);}
+    x+=w;
+  });
+}
+facade(1);facade(-1);
+
+// dry cooler (ch3)
+const CH_H=1.9;
+const cooler=new THREE.Group();cooler.position.y=H;
+const cbody=new THREE.Mesh(new THREE.BoxGeometry(L-0.1,CH_H,W-0.1),[M.white,M.white,new THREE.MeshStandardMaterial({color:'#c9cdd2',roughness:.6}),M.white,M.louver,M.louver]);
+cbody.position.y=CH_H/2;cooler.add(cbody);
+const fans=[];
+for(let i=0;i<6;i++)for(let j=0;j<2;j++){
+  const f=new THREE.Group();f.position.set(-L/2+1.0+i*2.04,CH_H+0.05,(j?1:-1)*0.56);
+  const ring=new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.5,0.1,28,1,true),M.fanHousing);f.add(ring);
+  const base=new THREE.Mesh(new THREE.CylinderGeometry(0.49,0.49,0.02,28),M.fanHousing);base.position.y=-0.04;f.add(base);
+  const rot=new THREE.Group();for(let k=0;k<5;k++){const bl=box(0.42,0.02,0.11,M.blade);bl.position.x=0.22;const arm=new THREE.Group();arm.rotation.y=k*Math.PI*2/5;bl.rotation.x=0.35;arm.add(bl);rot.add(arm);}
+  const hub=new THREE.Mesh(new THREE.CylinderGeometry(0.08,0.08,0.06,12),M.blade);rot.add(hub);rot.position.y=0.02;f.add(rot);fans.push(rot);cooler.add(f);
+}
+part(cooler,18.4,19.9,v3(0,7,0));
+
+// 800 VDC power center (ch4)
+const pc=new THREE.Mesh(new THREE.BoxGeometry(6,2.6,2.44),[M.power,M.power,new THREE.MeshStandardMaterial({color:'#c9cdd2'}),M.power,M.power,M.power]);
+pc.position.set(-12.6,1.3,0);part(pc,24.4,25.9,v3(-8,0,0));
+const busA=v3(-9.6,0.35,0),busB=v3(-6.1,0.35,0);
+const bd=busB.clone().sub(busA),bl=bd.length();
+const bus=new THREE.Group();[-0.24,0.24].forEach(o=>{const b=box(bl,0.16,0.34,M.bus);b.position.z=o;const lip=box(bl,0.03,0.38,M.frame);lip.position.set(0,0.09,o);bus.add(b,lip);});
+bus.position.copy(busA).add(busB).multiplyScalar(0.5);bus.position.y=0.1;bus.rotation.y=Math.atan2(-bd.z,bd.x);
+part(bus,25.6,26.5,v3(0,-0.6,0));
+const FLOW=26;
+const flow=new THREE.InstancedMesh(new THREE.BoxGeometry(0.22,0.06,0.08),new THREE.MeshBasicMaterial({color:'#b6ff5c',transparent:true,opacity:0}),FLOW);
+scene.add(flow);
+
+hero.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});
+
+// ---------- campus (ch5) ----------
+// site plan from the keynote's closing shot: one fenced concrete pad ringed by a road; blocks of POD column-pairs
+// share a front line, power centers flank each column, a back row of dark plant units, substation + parking to the east
+const podGeo=new THREE.BoxGeometry(L,H,W);podGeo.translate(0,H/2,0);
+const colGeo=new THREE.BoxGeometry(L-0.1,CH_H,W-0.1);colGeo.translate(0,CH_H/2,0);
+const pcGeo=new THREE.BoxGeometry(6,2.6,2.44);pcGeo.translate(0,1.3,0);
+const texWallC=facadeTex();
+const texLouverC=texLouver.clone();texLouverC.needsUpdate=true;texLouverC.repeat.set(2.4,1);
+const mPodSide=new THREE.MeshStandardMaterial({map:texWallC,roughness:.6}),mPodEnd=new THREE.MeshStandardMaterial({map:texEnd,roughness:.6}),mGrey=new THREE.MeshStandardMaterial({color:'#d4d7db',roughness:.6});
+const mColSide=new THREE.MeshStandardMaterial({map:texLouverC,roughness:.6}),mFanTop=new THREE.MeshStandardMaterial({map:texFanTop,roughness:.6});
+const PITCH=3.1, PAIR_GAP=14;
+const spots=[],pcs=[];
+// [x of first pair's left column, pairs, pods per column, start delay]
+const BLOCKS=[[0,1,12,30.4],[-108,2,13,31.3],[60,2,10,32.4]];
+const PAIR_PITCH=50,buses=[];
+// every POD gets its own 800 VDC power center in line with its outer end, joined by a twin busbar
+BLOCKS.forEach(([bx,pairs,n,t0])=>{
+  for(let p=0;p<pairs;p++){const xl=bx+p*PAIR_PITCH,xr=xl+PAIR_GAP;
+    for(let k=0;k<n;k++){const z=-k*PITCH,d=t0+k*0.1+p*0.45;
+      if(!(xl===0&&k===0)){spots.push([xl,z,d]);pcs.push([xl-12.6,z,d+0.2]);buses.push([xl-7.85,z,d+0.3]);}
+      spots.push([xr,z,d+0.05]);pcs.push([xr+12.6,z,d+0.25]);buses.push([xr+7.85,z,d+0.35]);}}
+});
+const podI=new THREE.InstancedMesh(podGeo,[mPodEnd,mPodEnd,mGrey,mGrey,mPodSide,mPodSide],spots.length);
+const colI=new THREE.InstancedMesh(colGeo,[mGrey,mGrey,mFanTop,mGrey,mColSide,mColSide],spots.length);
+const pcI=new THREE.InstancedMesh(pcGeo,M.power,pcs.length);
+const railGeo=new THREE.BoxGeometry(3.5,0.16,0.3);railGeo.translate(0,0.18,0);
+const busI=new THREE.InstancedMesh(railGeo,M.bus,buses.length*2);scene.add(busI);
+// spinning rotors on every campus dry cooler: 2 rows × 6 fans, one flat 5-blade shape per fan
+const bladeShapes=[];for(let k=0;k<5;k++){const a=k*Math.PI*2/5,P=(r,t)=>new THREE.Vector2(Math.cos(a+t)*r,Math.sin(a+t)*r);
+  bladeShapes.push(new THREE.Shape([P(0.07,-0.18),P(0.44,-0.32),P(0.45,0.08),P(0.07,0.18)]));}
+const rotorGeo=new THREE.ShapeGeometry(bladeShapes);rotorGeo.rotateX(-Math.PI/2);
+const rotorMat=new THREE.MeshStandardMaterial({color:'#4a4f57',roughness:.45,metalness:.5,side:THREE.DoubleSide});
+const FAN_OFF=[];for(let i=0;i<6;i++)for(const z of [-0.585,0.585])FAN_OFF.push([-5.08+i*2.01,z,(i*2+(z>0?1:0))*0.7]);
+const rotorI=new THREE.InstancedMesh(rotorGeo,rotorMat,spots.length*FAN_OFF.length);scene.add(rotorI);
+[podI,colI,pcI].forEach(m=>{m.receiveShadow=true;scene.add(m);});
+const site=new THREE.Group();scene.add(site);
+const padMat=new THREE.MeshStandardMaterial({color:'#16181b',roughness:.9});
+const roadMat=new THREE.MeshStandardMaterial({color:'#0e0f11',roughness:.85});
+const flat=(w,d,m,x,z,y)=>{const o=new THREE.Mesh(new THREE.PlaneGeometry(w,d),m);o.rotation.x=-Math.PI/2;o.position.set(x,y||0.02,z);o.receiveShadow=true;site.add(o);return o;};
+const PX0=-128,PX1=144,PZ0=12,PZ1=-52;
+flat(PX1-PX0,PZ0-PZ1,padMat,(PX0+PX1)/2,(PZ0+PZ1)/2);
+// ring road + east access road + lane marks
+[[ (PX0+PX1)/2,PZ0+6,PX1-PX0+24,10],[(PX0+PX1)/2,PZ1-6,PX1-PX0+24,10],[PX0-6,(PZ0+PZ1)/2,10,PZ0-PZ1+22],[PX1+6,(PZ0+PZ1)/2,10,PZ0-PZ1+22],[PX1+60,PZ0+6,100,10],[PX1+30,-10,12,60]]
+  .forEach(([x,z,w,d])=>flat(w,d,roadMat,x,z,0.015));
+const markMat=new THREE.MeshBasicMaterial({color:'#8a8478'});
+for(let x=PX0;x<PX1;x+=8)flat(3,0.25,markMat,x,PZ0+6,0.02);
+// perimeter fence
+const fenceMat=new THREE.MeshStandardMaterial({color:'#4a4d52',roughness:.6,metalness:.4});
+[[(PX0+PX1)/2,PZ0+12,PX1-PX0+36,0.06],[(PX0+PX1)/2,PZ1-12,PX1-PX0+36,0.06],[PX0-12,(PZ0+PZ1)/2,0.06,PZ0-PZ1+24]].forEach(([x,z,w,d])=>{const f=box(w,1.8,d,fenceMat);f.position.set(x,0.9,z);site.add(f);});
+// back row of dark plant units (generators / batteries) along the rear edge
+const plantGeo=new THREE.BoxGeometry(9,2.2,3.6);plantGeo.translate(0,1.1,0);
+const plantMat=new THREE.MeshStandardMaterial({color:'#2b2f35',roughness:.5,metalness:.4});
+const plants=[];for(let x=PX0+8;x<PX1-4;x+=11)plants.push(x);
+const plantI=new THREE.InstancedMesh(plantGeo,plantMat,plants.length);site.add(plantI);
+// substation, tanks, parking, trees
+const sub=new THREE.Group();sub.position.set(PX1+40,0,-30);
+for(let i=0;i<6;i++){const t=box(4,3.2,3,mGrey);t.position.set((i%3)*7,1.6,Math.floor(i/3)*8);sub.add(t);}
+for(let i=0;i<4;i++){const c=new THREE.Mesh(new THREE.CylinderGeometry(2,2,6,20),mGrey);c.position.set(24+(i%2)*5,3,(i>>1)*5);sub.add(c);}
+for(let i=0;i<6;i++){const tw=box(0.25,9,0.25,M.frame);tw.position.set(-6,4.5,-4+i*4);sub.add(tw);}
+const bld=box(14,4,8,mGrey);bld.position.set(8,2,22);sub.add(bld);
+site.add(sub);
+const carMats=['#e8e8e8','#30343a','#9aa0a8','#6a1c1c'].map(c=>new THREE.MeshStandardMaterial({color:c,roughness:.4,metalness:.5}));
+flat(40,24,roadMat,PX1+80,12,0.016);
+for(let i=0;i<14;i++){const c=box(4.4,1.4,1.9,carMats[i%4]);c.position.set(PX1+64+(i%7)*5,0.7,6+Math.floor(i/7)*10);site.add(c);}
+const treeMat=new THREE.MeshStandardMaterial({color:'#3f4a2a',roughness:.9});
+[[PX1+30,-55],[PX1+62,-12],[PX1+70,-40],[PX1+100,4],[PX1+18,20],[PX1+110,-20]].forEach(([x,z])=>{const t=new THREE.Mesh(new THREE.SphereGeometry(3,10,8),treeMat);t.scale.y=0.8;t.position.set(x,2.6,z);site.add(t);});
+// desert hills on the horizon (they come out of the dark at dusk)
+const hillMat=new THREE.MeshStandardMaterial({color:'#4a3726',roughness:1,flatShading:true});
+[[-260,-380,140,40],[-60,-420,180,55],[160,-400,150,46],[340,-330,120,36],[-380,-250,110,30]].forEach(([x,z,r,h])=>{const m=new THREE.Mesh(new THREE.ConeGeometry(r,h,9,1),hillMat);m.position.set(x,h/2-2,z);site.add(m);});
+const dummy=new THREE.Object3D();
+function placeCampus(T){
+  const set=(mesh,list,yb)=>list.forEach(([x,z,d],i)=>{const p=ease(clamp((T-d)/0.7));
+    dummy.position.set(x,yb(p),z);dummy.rotation.set(0,0,0);dummy.scale.set(1,Math.max(p,0.0001),1);dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix);});
+  set(podI,spots,()=>0);set(colI,spots,p=>H*p);set(pcI,pcs,()=>0);
+  buses.forEach(([x,z,d],i)=>{const p=ease(clamp((T-d)/0.5));[-0.24,0.24].forEach((o,j)=>{dummy.position.set(x,0,z+o);dummy.rotation.set(0,0,0);dummy.scale.set(Math.max(p,0.0001),1,1);dummy.updateMatrix();busI.setMatrixAt(i*2+j,dummy.matrix);});});
+  busI.instanceMatrix.needsUpdate=true;busI.visible=T>30.2;
+  if(T>30.2){const spin=performance.now()/1000*9;let j=0;
+    spots.forEach(([x,z,d])=>{const p=ease(clamp((T-d)/0.7));const on=p>0.98;
+      FAN_OFF.forEach(([fx,fz,ph])=>{dummy.position.set(x+fx,H+CH_H*p+0.035,z+fz);dummy.rotation.set(0,(on?spin:0)+ph,0);dummy.scale.setScalar(on?1:0.0001);dummy.updateMatrix();rotorI.setMatrixAt(j++,dummy.matrix);});});
+    rotorI.instanceMatrix.needsUpdate=true;}
+  rotorI.visible=T>30.2;
+  plants.forEach((x,i)=>{const p=ease(clamp((T-34-i*0.04)/0.7));dummy.position.set(x,0,PZ1+4);dummy.rotation.set(0,0,0);dummy.scale.set(1,Math.max(p,0.0001),1);dummy.updateMatrix();plantI.setMatrixAt(i,dummy.matrix);});
+  podI.instanceMatrix.needsUpdate=colI.instanceMatrix.needsUpdate=pcI.instanceMatrix.needsUpdate=plantI.instanceMatrix.needsUpdate=true;
+  const vis=T>30.2;podI.visible=colI.visible=pcI.visible=site.visible=vis;
+  const k=ease(clamp((T-30.6)/1.3));
+  scene.background.copy(C.bg0).lerp(C.bg1,k);scene.fog.color.copy(scene.background);
+  scene.fog.far=230+k*420;scene.fog.near=35+k*120;
+  ground.material.color.copy(C.g0).lerp(C.g1,k);padMat.color.copy(C.p0).lerp(C.p1,k);roadMat.color.copy(C.r0).lerp(C.r1,k);
+  hillMat.color.copy(C.g0).lerp(C.h1,k);
+  key.color.copy(C.k0).lerp(C.k1,k);key.intensity=1.05+k*0.45;hemi.intensity=0.34+k*0.4;renderer.toneMappingExposure=0.95+k*0.2;
+  // studio floor gives way to the desert at dusk; the mirror is only worth its cost before the campus
+  floorMat.opacity=0.86*(1-k);floor.visible=k<0.99;if(mirror)mirror.visible=T<30.2;
+  pool.material.opacity=0.1*(1-clamp((T-30)/2));pool.visible=pool.material.opacity>0.005;
+}
+const C={bg0:new THREE.Color('#050607'),bg1:new THREE.Color('#3b2d22'),g0:new THREE.Color('#030304'),g1:new THREE.Color('#4a3b2c'),h1:new THREE.Color('#5c4430'),
+  p0:new THREE.Color('#16181b'),p1:new THREE.Color('#77716a'),r0:new THREE.Color('#0e0f11'),r1:new THREE.Color('#1c1c1d'),k0:new THREE.Color('#fff3e2'),k1:new THREE.Color('#ffb27a')};
+
+// ---------- timeline + UI ----------
+function clamp(x){return Math.max(0,Math.min(1,x));}
+function ease(t){return 1-Math.pow(1-t,3);}
+let T=reduce?23.9:0,playing=!reduce,xray=false,chIdx=-1,camGoal=null,userCam=false;
+const chapsEl=document.getElementById('chaps');
+CH.forEach((c,i)=>{const b=document.createElement('button');b.className='chap';b.id='chap-'+i;b.innerHTML=`<b>${String(i+1).padStart(2,'0')}</b><span class="ct">${c.title}</span><i></i>`;
+  b.addEventListener('click',()=>{T=c.t+0.01;playing=true;});chapsEl.appendChild(b);});
+const chapBtns=[...chapsEl.children];let lastScrolled=-1;
+const playBtn=document.getElementById('play'),xrayBtn=document.getElementById('xray'),doorBtn=document.getElementById('doors');let doorsOpen=false;
+doorBtn.addEventListener('click',()=>{doorsOpen=!doorsOpen;doorBtn.setAttribute('aria-pressed',doorsOpen);doorBtn.textContent=doorsOpen?LG().close:LG().open;});
+// language: 中文 / English, remembered per viewer
+const UI={zh:{open:'開門',close:'關門',xray:'透視',pause:'暫停',play:'播放',chaps:'章節',btn:'EN',src:'數據取自 GTC 主題演講與 NVIDIA 新聞稿（2026/10/21）· 場景為概念示意',hint:'拖曳旋轉 · 滾輪/雙指縮放'},
+  en:{open:'Open doors',close:'Close doors',xray:'X-ray',pause:'Pause',play:'Play',chaps:'Chapters',btn:'中文',src:'Figures from the GTC keynote and NVIDIA press release (2026-10-21) · Conceptual scene',hint:'Drag to orbit · Scroll / pinch to zoom'}};
+let lang='en';try{if(localStorage.getItem('dsx-lang2')==='zh')lang='zh';}catch(e){}
+const LG=()=>UI[lang];const txt=c=>lang==='en'?{...c,...c.en}:c;
+function applyLang(){const u=LG();document.documentElement.lang=lang==='en'?'en':'zh-Hant';
+  document.getElementById('lang').textContent=u.btn;document.getElementById('xray').textContent=u.xray;
+  doorBtn.textContent=doorsOpen?u.close:u.open;document.getElementById('note-src').textContent=u.src;document.getElementById('note-hint').textContent=u.hint;
+  document.getElementById('chaps').setAttribute('aria-label',u.chaps);
+  chapBtns.forEach((b,i)=>{b.querySelector('.ct').textContent=txt(CH[i]).title;});
+  syncPlay();if(chIdx>=0)setCaption(chIdx);}
+document.getElementById('lang').addEventListener('click',()=>{lang=lang==='en'?'zh':'en';try{localStorage.setItem('dsx-lang2',lang);}catch(e){}applyLang();});
+function syncPlay(){playBtn.textContent=playing?'❚❚':'▶';playBtn.setAttribute('aria-label',playing?LG().pause:LG().play);}
+playBtn.addEventListener('click',()=>{if(!playing&&T>=END-0.01)T=0;playing=!playing;syncPlay();});
+xrayBtn.addEventListener('click',()=>{xray=!xray;xrayBtn.setAttribute('aria-pressed',xray);});
+applyLang();
+controls.addEventListener('start',()=>{userCam=true;});
+
+const narrow=()=>innerWidth<640;
+function view(i){
+  const n=narrow();
+  return [
+    {p:n?[2.3,2.4,5.6]:[2.0,2.0,4.4],t:[racks[HERO].position.x,1.3,-0.4]},
+    {p:n?[3.5,2.6,13]:[3,2.3,9.5],t:[0.3,1.1,-0.5]},
+    {p:n?[2,2.2,17]:[1.6,1.9,11.5],t:[0,1.35,-0.3]},
+    {p:n?[12,5,18]:[10,4.2,13.5],t:[0,1.5,0]},
+    {p:n?[13,9,19]:[11,7,15],t:[0,2.6,0]},
+    {p:n?[2,8,22]:[1.5,6,16],t:[-7,1.6,0]},
+    {p:n?[60,95,240]:[40,72,170],t:[10,0,-22]},
+  ][i];
+}
+const cap=document.getElementById('cap');
+function setCaption(i){
+  cap.classList.add('fade');
+  setTimeout(()=>{const c=txt(CH[i]);
+    document.getElementById('c-eye').textContent=c.eye;document.getElementById('c-title').textContent=c.title;
+    document.getElementById('c-stat').innerHTML=c.stat.map(s=>`<span>${s}</span>`).join('');document.getElementById('c-body').textContent=c.body;
+    cap.classList.remove('fade');},chIdx<0?0:280);
+}
+
+function update(Tn,dt,time){
+  const T=buildT(Tn);
+  anim.forEach(({o,a,b,off,useN})=>{const tt=useN?Tn:T;const p=ease(clamp((tt-a)/(b-a)));o.position.copy(o.userData.base).addScaledVector(off,1-p);o.visible=p>0.002;});
+  const deck=ease(clamp((T-5)/1.1));
+  racks.forEach(r=>{const R=r.userData.rack;r.position.y-=(1-deck)*(B+0.02);
+    const on=Tn>=R.at;if(R.bare){const want=on?R.cabled.map:R.bare;if(R.front.map!==want){R.front.map=want;R.front.emissiveMap=want;}}
+    const sp=ease(clamp((Tn-R.at)/0.5));R.stubs.forEach(st=>{st.visible=sp>0.01;st.scale.set(sp,0.9*sp,sp);});});
+  // chapter
+  let ci=0;CH.forEach((c,i)=>{if(Tn>=c.t)ci=i;});
+  if(ci!==chIdx){setCaption(ci);chIdx=ci;userCam=false;const v=view(ci);camGoal={p:v3(...v.p),t:v3(...v.t)};}
+  if(ci!==lastScrolled){lastScrolled=ci;const b=chapBtns[ci];const cx=chapsEl;if(cx.scrollWidth>cx.clientWidth)cx.scrollTo({left:Math.max(0,b.offsetLeft-cx.offsetLeft-8),behavior:reduce?'auto':'smooth'});}
+  chapBtns.forEach((b,i)=>{b.classList.toggle('on',i===ci);const s=CH[i].t,e=i<CH.length-1?CH[i+1].t:END;b.lastChild.style.width=(clamp((Tn-s)/(e-s))*100)+'%';});
+  xrayBtn.disabled=T<13;if(T<13&&xray){xray=false;xrayBtn.setAttribute('aria-pressed','false');}
+  const dOk=T>=14.6;doorBtn.disabled=!dOk;if(!dOk&&doorsOpen){doorsOpen=false;doorBtn.setAttribute('aria-pressed','false');doorBtn.textContent=LG().open;}
+  doors.forEach((d,i)=>{const g=doorsOpen?-1.72*d.userData.dir:0;d.rotation.y+=(g-d.rotation.y)*Math.min(1,dt*(3+i*0.25));});
+  // shell opacity
+  const op=xray?0.12:1;shellMats.forEach(m=>{m.opacity+=(op-m.opacity)*0.12;m.depthWrite=m.opacity>0.9;});
+  // interior glow
+  const interiorOpen=(T>=5&&T<14.5)||xray||doorsOpen;
+  inners.forEach(l=>{l.intensity+=((interiorOpen?0.5:0)-l.intensity)*0.08;});
+  const pulse=0.5+0.5*Math.sin(time*2.6);
+  racks.forEach(r=>{const R=r.userData.rack;if(R.bare)R.front.emissiveIntensity=(Tn>=R.at?0.04+pulse*0.04:0.05);});M.rackN.emissiveIntensity=0.3;
+  // fans
+  const fanOn=T>=19.6?1:0;fans.forEach((f,i)=>{f.rotation.y+=dt*(9+i%3)*fanOn;});
+  // power flow
+  const flowOn=T>=26.3;flow.material.opacity+=((flowOn?1:0)-flow.material.opacity)*0.1;
+  for(let i=0;i<FLOW;i++){const u=((i/FLOW)+time*0.35)%1;const pnt=busA.clone().lerp(busB,u);pnt.y=0.52;dummy.position.copy(pnt);dummy.rotation.set(0,bus.rotation.y,0);dummy.scale.setScalar(1);dummy.updateMatrix();flow.setMatrixAt(i,dummy.matrix);}
+  flow.instanceMatrix.needsUpdate=true;flow.visible=flow.material.opacity>0.01;
+  placeCampus(T);
+}
+
+function resize(){renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();if(chIdx>=0&&!userCam){const v=view(chIdx);camGoal={p:v3(...v.p),t:v3(...v.t)};}}
+addEventListener('resize',resize);resize();
+{const v=view(0);camera.position.set(v.p[0]+3,v.p[1]+1,v.p[2]+4);controls.target.set(...v.t);}
+
+let last=performance.now(),time=0;
+function tick(now){
+  const dt=Math.min(0.05,(now-last)/1000);last=now;time+=dt;
+  if(playing){T+=dt;if(T>=END){T=END;playing=false;syncPlay();}}
+  update(T,dt,time);
+  if(camGoal&&!userCam){const k=reduce?1:0.03;camera.position.lerp(camGoal.p,k);controls.target.lerp(camGoal.t,k);if(camera.position.distanceTo(camGoal.p)<0.05)camGoal=null;}
+  controls.update();renderer.render(scene,camera);requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+})();
+</script>
+
+</body>
+</html>
