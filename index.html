@@ -42,6 +42,16 @@ html,body{height:100%;margin:0;overflow:hidden;background:var(--bg);color:var(--
 .chap b{display:block;font:600 10px var(--f-mono);letter-spacing:.1em;margin-bottom:2px}
 .chap.on{color:var(--fg);border-color:#3a4049}
 .chap i{position:absolute;left:0;bottom:0;height:3px;background:var(--green);width:0}
+.twin{position:fixed;top:calc(env(safe-area-inset-top,0px) + 16px);right:max(16px,env(safe-area-inset-right,0px));width:236px;background:rgba(10,12,15,.82);border:1px solid var(--line);border-top:3px solid #3ec5ff;border-radius:8px;padding:12px 14px;backdrop-filter:blur(8px);font:12px var(--f-body);z-index:4}
+.tw-h{display:flex;justify-content:space-between;align-items:baseline;font:700 15px var(--f-disp);margin-bottom:8px}
+.tw-sim{font:10px var(--f-mono);color:var(--mute);letter-spacing:.08em}
+.tw-bar{height:8px;border-radius:4px;background:linear-gradient(90deg,#1f6bff,#3ec5ff 35%,#f2c23a 62%,#ff3b2f)}
+.tw-scale{display:flex;justify-content:space-between;font:10px var(--f-mono);color:var(--mute);margin:3px 0 8px}
+.tw-dl{display:grid;grid-template-columns:1fr auto;gap:4px 10px;margin:0;font-variant-numeric:tabular-nums}
+.tw-dl dt{color:var(--mute)}.tw-dl dd{margin:0;font:600 12px var(--f-mono);text-align:right}
+.tw-key{display:flex;gap:12px;margin-top:9px;color:var(--mute)}.tw-key span{display:flex;align-items:center;gap:5px}.tw-key b{font-weight:400}
+.tw-key i{width:8px;height:8px;border-radius:50%}
+.ctl.twin-btn[aria-pressed="true"]{border-color:#3ec5ff;color:#3ec5ff;background:rgba(62,197,255,.12)}
 .note{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font:11px var(--f-mono);color:var(--mute)}
 @media (max-width:640px){
   .cap p{display:none}.note .hint{display:none}
@@ -55,6 +65,8 @@ html,body{height:100%;margin:0;overflow:hidden;background:var(--bg);color:var(--
   .chap .ct{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
   .ctl{flex:1 1 0;justify-content:center;min-height:40px;padding:0 6px;font-size:12px;white-space:nowrap}
   #play{flex:0 0 52px}
+  .twin{top:auto;bottom:calc(env(safe-area-inset-bottom,0px) + 150px);left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));width:auto;padding:10px 12px}
+  .tw-dl{grid-template-columns:auto auto auto auto;gap:3px 8px}.tw-dl dd{text-align:left}
   .note{font-size:10px;line-height:1.4}
 }
 </style>
@@ -68,11 +80,23 @@ html,body{height:100%;margin:0;overflow:hidden;background:var(--bg);color:var(--
   <p id="c-body"></p>
 </div>
 
+<aside class="twin" id="twinPanel" hidden aria-live="polite">
+  <div class="tw-h"><span id="tw-title">數位孿生</span><span class="tw-sim" id="tw-simlbl">模擬數值</span></div>
+  <div class="tw-bar"></div><div class="tw-scale"><span>25 °C</span><span>35 °C</span><span>45 °C</span></div>
+  <dl class="tw-dl">
+    <dt id="tw-l1">冷卻液供水</dt><dd id="tw-sup">-- °C</dd>
+    <dt id="tw-l2">冷卻液回水</dt><dd id="tw-ret">-- °C</dd>
+    <dt id="tw-l3">最熱機櫃</dt><dd id="tw-hot">--</dd>
+    <dt id="tw-l4">運算負載</dt><dd id="tw-load">-- %</dd>
+  </dl>
+  <div class="tw-key"><span><i style="background:#7fd8ff"></i><b id="tw-k1">供水</b></span><span><i style="background:#ff7a52"></i><b id="tw-k2">回水</b></span><span><i style="background:#c6ff6a"></i><b id="tw-k3">電力</b></span></div>
+</aside>
 <div class="rail">
   <div class="row">
     <button class="ctl" id="play" aria-label="Pause">❚❚</button>
     <div class="chaps" id="chaps" role="group" aria-label="章節"></div>
     <button class="ctl" id="doors" aria-pressed="false" disabled>開門</button>
+    <button class="ctl twin-btn" id="twin" aria-pressed="false">孿生</button>
     <button class="ctl" id="xray" aria-pressed="false" disabled>透視</button>
     <button class="ctl" id="lang" aria-label="Switch language">EN</button>
   </div>
@@ -570,6 +594,59 @@ function placeCampus(T){
 const C={bg0:new THREE.Color('#050607'),bg1:new THREE.Color('#3b2d22'),g0:new THREE.Color('#030304'),g1:new THREE.Color('#4a3b2c'),h1:new THREE.Color('#5c4430'),
   p0:new THREE.Color('#16181b'),p1:new THREE.Color('#77716a'),r0:new THREE.Color('#0e0f11'),r1:new THREE.Color('#1c1c1d'),k0:new THREE.Color('#fff3e2'),k1:new THREE.Color('#ffb27a')};
 
+// ---------- digital-twin overlay: rack heat map + coolant and power flow (simulated values) ----------
+const TW={on:false,k:0};
+const HEAT=[[0,new THREE.Color('#1f6bff')],[0.35,new THREE.Color('#3ec5ff')],[0.62,new THREE.Color('#f2c23a')],[1,new THREE.Color('#ff3b2f')]];
+function heatColor(h,out){h=clamp(h);for(let i=1;i<HEAT.length;i++)if(h<=HEAT[i][0]){const [a,ca]=HEAT[i-1],[b,cb]=HEAT[i];return out.copy(ca).lerp(cb,(h-a)/(b-a));}return out.copy(HEAT[HEAT.length-1][1]);}
+// heat shells hug every rack
+racks.forEach((r,i)=>{const R=r.userData.rack;R.heat0=R.kind==='C'?0.74+Math.random()*0.2:R.kind==='P'?0.22+Math.random()*0.06:0.48+Math.random()*0.1;
+  const m=new THREE.MeshBasicMaterial({color:'#000',transparent:true,opacity:0,depthWrite:false});
+  const s=new THREE.Mesh(new THREE.BoxGeometry(RW+0.03,RH+0.03,1.24),m);s.visible=false;r.add(s);R.shell=s;});
+// glowing supply / return pipes over the existing dark lines
+const tube=(r,y,z,c)=>{const t=new THREE.Mesh(new THREE.CylinderGeometry(r,r,L-1.0,14),new THREE.MeshBasicMaterial({color:c,transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false}));t.rotation.z=Math.PI/2;t.position.set(0.2,y,z);t.visible=false;hero.add(t);return t;};
+const supTube=tube(0.065,2.78,-0.2,'#3ec5ff'),retTube=tube(0.075,2.8,0.15,'#ff5a3d'),pwrTube=tube(0.05,2.83,-0.75,'#b6ff5c');pwrTube.scale.y=(L-1.4)/(L-1.0);
+// particle pools
+const dotGeo=new THREE.SphereGeometry(0.05,8,6);
+const twPool=(c,n)=>{const m=new THREE.InstancedMesh(dotGeo,new THREE.MeshBasicMaterial({color:c}),n);m.visible=false;m.frustumCulled=false;hero.add(m);return m;};
+const coldI=twPool('#7fd8ff',200),hotI=twPool('#ff7a52',200),pwrI=twPool('#c6ff6a',80);
+const _c=new THREE.Color();
+function drawTwin(Tn,T,time){
+  TW.k+=((TW.on?1:0)-TW.k)*0.12;const k=TW.k,vis=k>0.01;
+  racks.forEach((r,i)=>{const R=r.userData.rack;R.shell.visible=vis&&r.visible;if(!vis)return;
+    R.heat=clamp(R.heat0+0.07*Math.sin(time*0.7+i*1.3)+(Tn>=R.at||!R.bare?0:-0.25));
+    heatColor(R.heat,_c);R.shell.material.color.copy(_c);R.shell.material.opacity=k*(0.5+0.08*Math.sin(time*2+i));});
+  [supTube,retTube,pwrTube].forEach(t=>{t.visible=vis&&T>=9.8;t.material.opacity=k*0.45;});
+  [coldI,hotI,pwrI].forEach(m=>m.visible=vis);
+  if(!vis)return;
+  let c=0,h=0,p=0;const put=(mesh,idx,x,y,z,s=1)=>{dummy.position.set(x,y,z);dummy.rotation.set(0,0,0);dummy.scale.setScalar(s);dummy.updateMatrix();mesh.setMatrixAt(idx,dummy.matrix);};
+  const pipes=T>=9.8,x0=-L/2+0.8,x1=L/2-0.6;
+  if(pipes)for(let i=0;i<36;i++){const u=(i/36+time*0.12)%1;put(coldI,c++,x1-(x1-x0)*u,2.78,-0.2);put(hotI,h++,x0+(x1-x0)*u,2.8,0.15);}
+  // each cabled rack: cold drop down the left rail, hot rise up the right rail
+  racks.forEach(r=>{const R=r.userData.rack;if(R.kind==='P'||!r.visible)return;const x=r.position.x,yb=r.position.y-RH/2+0.2,yt=r.position.y+RH/2,z=r.position.z+0.63;
+    for(let j=0;j<5;j++){const u=(j/5+time*0.45)%1;put(coldI,c++,x-0.25,yt-(yt-yb)*u,z,0.8);put(hotI,h++,x+0.25,yb+(yt-yb)*u,z,0.8);}});
+  // to and from the dry cooler on the roof
+  if(T>=19.9)for(let j=0;j<10;j++){const u=(j/10+time*0.3)%1;put(hotI,h++,x1+0.15,2.8+(H+CH_H*0.6-2.8)*u,0.15);put(coldI,c++,x1-0.15,H+CH_H*0.6-(H+CH_H*0.6-2.78)*u,-0.2);}
+  // power: switchgear along the overhead tray, then down into each rack top
+  if(T>=9.6){const xs=sg.position.x+0.4,xe=x1;for(let i=0;i<30;i++){const u=(i/30+time*0.25)%1;put(pwrI,p++,xs+(xe-xs)*u,2.83,-0.75,0.85);}
+    racks.forEach((r,ri)=>{if(!r.visible)return;const u=(time*0.6+ri*0.17)%1;put(pwrI,p++,r.position.x,2.8-(2.8-(r.position.y+RH/2))*u,-0.75,0.7);});}
+  for(;c<200;c++)put(coldI,c,0,-50,0,0.0001);for(;h<200;h++)put(hotI,h,0,-50,0,0.0001);for(;p<80;p++)put(pwrI,p,0,-50,0,0.0001);
+  coldI.instanceMatrix.needsUpdate=hotI.instanceMatrix.needsUpdate=pwrI.instanceMatrix.needsUpdate=true;
+}
+// campus: tint each dry cooler by its heat
+const campusHeat=spots.map(()=>0.35+Math.random()*0.6);let campusTint=-1;
+function tintCampus(time){const k=Math.round(TW.k*20)/20;if(k===campusTint&&k===0)return;campusTint=k;
+  spots.forEach((s,i)=>{heatColor(campusHeat[i]+0.06*Math.sin(time*0.6+i),_c);_c.lerp(new THREE.Color('#ffffff'),1-k);colI.setColorAt(i,_c);});
+  if(colI.instanceColor)colI.instanceColor.needsUpdate=true;}
+spots.forEach((s,i)=>colI.setColorAt(i,new THREE.Color('#ffffff')));
+// readouts
+let twAcc=0;
+function twinPanel(dt,time){twAcc+=dt;if(twAcc<0.5||!TW.on)return;twAcc=0;
+  const hot=racks.filter(r=>r.userData.rack.kind!=='P');const top=hot.reduce((a,r)=>r.userData.rack.heat>a.userData.rack.heat?r:a,hot[0]);
+  const sup=30+0.4*Math.sin(time*0.3),ret=sup+11+1.2*Math.sin(time*0.45);
+  document.getElementById('tw-sup').textContent=sup.toFixed(1)+' °C';document.getElementById('tw-ret').textContent=ret.toFixed(1)+' °C';
+  document.getElementById('tw-hot').textContent=`#${racks.indexOf(top)+1} · ${(28+top.userData.rack.heat*18).toFixed(1)} °C`;
+  document.getElementById('tw-load').textContent=(88+6*Math.sin(time*0.2)).toFixed(0)+' %';}
+
 // ---------- timeline + UI ----------
 function clamp(x){return Math.max(0,Math.min(1,x));}
 function ease(t){return 1-Math.pow(1-t,3);}
@@ -581,12 +658,13 @@ const chapBtns=[...chapsEl.children];let lastScrolled=-1;
 const playBtn=document.getElementById('play'),xrayBtn=document.getElementById('xray'),doorBtn=document.getElementById('doors');let doorsOpen=false;
 doorBtn.addEventListener('click',()=>{doorsOpen=!doorsOpen;doorBtn.setAttribute('aria-pressed',doorsOpen);doorBtn.textContent=doorsOpen?LG().close:LG().open;});
 // language: 中文 / English, remembered per viewer
-const UI={zh:{open:'開門',close:'關門',xray:'透視',pause:'暫停',play:'播放',chaps:'章節',btn:'EN',src:'數據取自 GTC 主題演講與 NVIDIA 新聞稿（2026/10/21）· 場景為概念示意',hint:'拖曳旋轉 · 滾輪/雙指縮放'},
-  en:{open:'Open doors',close:'Close doors',xray:'X-ray',pause:'Pause',play:'Play',chaps:'Chapters',btn:'中文',src:'Figures from the GTC keynote and NVIDIA press release (2026-10-21) · Conceptual scene',hint:'Drag to orbit · Scroll / pinch to zoom'}};
+const UI={zh:{twin:'孿生',twT:'數位孿生',twSim:'模擬數值',twL:['冷卻液供水','冷卻液回水','最熱機櫃','運算負載'],twK:['供水','回水','電力'],open:'開門',close:'關門',xray:'透視',pause:'暫停',play:'播放',chaps:'章節',btn:'EN',src:'數據取自 GTC 主題演講與 NVIDIA 新聞稿（2026/10/21）· 場景為概念示意',hint:'拖曳旋轉 · 滾輪/雙指縮放'},
+  en:{twin:'Twin',twT:'Digital Twin',twSim:'SIMULATED',twL:['Coolant supply','Coolant return','Hottest rack','Compute load'],twK:['Supply','Return','Power'],open:'Open doors',close:'Close doors',xray:'X-ray',pause:'Pause',play:'Play',chaps:'Chapters',btn:'中文',src:'Figures from the GTC keynote and NVIDIA press release (2026-10-21) · Conceptual scene',hint:'Drag to orbit · Scroll / pinch to zoom'}};
 let lang='en';try{if(localStorage.getItem('dsx-lang2')==='zh')lang='zh';}catch(e){}
 const LG=()=>UI[lang];const txt=c=>lang==='en'?{...c,...c.en}:c;
 function applyLang(){const u=LG();document.documentElement.lang=lang==='en'?'en':'zh-Hant';
-  document.getElementById('lang').textContent=u.btn;document.getElementById('xray').textContent=u.xray;
+  document.getElementById('lang').textContent=u.btn;document.getElementById('xray').textContent=u.xray;document.getElementById('twin').textContent=u.twin;document.getElementById('tw-title').textContent=u.twT;document.getElementById('tw-simlbl').textContent=u.twSim;
+  u.twL.forEach((t,i)=>document.getElementById('tw-l'+(i+1)).textContent=t);u.twK.forEach((t,i)=>document.getElementById('tw-k'+(i+1)).textContent=t);
   doorBtn.textContent=doorsOpen?u.close:u.open;document.getElementById('note-src').textContent=u.src;document.getElementById('note-hint').textContent=u.hint;
   document.getElementById('chaps').setAttribute('aria-label',u.chaps);
   chapBtns.forEach((b,i)=>{b.querySelector('.ct').textContent=txt(CH[i]).title;});
@@ -595,6 +673,7 @@ document.getElementById('lang').addEventListener('click',()=>{lang=lang==='en'?'
 function syncPlay(){playBtn.textContent=playing?'❚❚':'▶';playBtn.setAttribute('aria-label',playing?LG().pause:LG().play);}
 playBtn.addEventListener('click',()=>{if(!playing&&T>=END-0.01)T=0;playing=!playing;syncPlay();});
 xrayBtn.addEventListener('click',()=>{xray=!xray;xrayBtn.setAttribute('aria-pressed',xray);});
+const twinBtn=document.getElementById('twin');twinBtn.addEventListener('click',()=>{TW.on=!TW.on;twinBtn.setAttribute('aria-pressed',TW.on);document.getElementById('twinPanel').hidden=!TW.on;twAcc=1;});
 applyLang();
 controls.addEventListener('start',()=>{userCam=true;});
 
@@ -636,7 +715,7 @@ function update(Tn,dt,time){
   const dOk=T>=14.6;doorBtn.disabled=!dOk;if(!dOk&&doorsOpen){doorsOpen=false;doorBtn.setAttribute('aria-pressed','false');doorBtn.textContent=LG().open;}
   doors.forEach((d,i)=>{const g=doorsOpen?-1.72*d.userData.dir:0;d.rotation.y+=(g-d.rotation.y)*Math.min(1,dt*(3+i*0.25));});
   // shell opacity
-  const op=xray?0.12:1;shellMats.forEach(m=>{m.opacity+=(op-m.opacity)*0.12;m.depthWrite=m.opacity>0.9;});
+  const op=(xray||TW.on)?0.12:1;shellMats.forEach(m=>{m.opacity+=(op-m.opacity)*0.12;m.depthWrite=m.opacity>0.9;});
   // interior glow
   const interiorOpen=(T>=5&&T<14.5)||xray||doorsOpen;
   inners.forEach(l=>{l.intensity+=((interiorOpen?0.5:0)-l.intensity)*0.08;});
@@ -645,10 +724,11 @@ function update(Tn,dt,time){
   // fans
   const fanOn=T>=19.6?1:0;fans.forEach((f,i)=>{f.rotation.y+=dt*(9+i%3)*fanOn;});
   // power flow
-  const flowOn=T>=26.3;flow.material.opacity+=((flowOn?1:0)-flow.material.opacity)*0.1;
+  const flowOn=T>=26.3||(TW.on&&T>=26.0);flow.material.opacity+=((flowOn?1:0)-flow.material.opacity)*0.1;
   for(let i=0;i<FLOW;i++){const u=((i/FLOW)+time*0.35)%1;const pnt=busA.clone().lerp(busB,u);pnt.y=0.52;dummy.position.copy(pnt);dummy.rotation.set(0,bus.rotation.y,0);dummy.scale.setScalar(1);dummy.updateMatrix();flow.setMatrixAt(i,dummy.matrix);}
   flow.instanceMatrix.needsUpdate=true;flow.visible=flow.material.opacity>0.01;
   placeCampus(T);
+  drawTwin(Tn,T,time);if(T>30.2)tintCampus(time);twinPanel(dt,time);
 }
 
 function resize(){renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();if(chIdx>=0&&!userCam){const v=view(chIdx);camGoal={p:v3(...v.p),t:v3(...v.t)};}}
